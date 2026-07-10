@@ -1,3 +1,21 @@
+server:
+    port: 8080
+    servlet:
+        context-path: /identity
 spring:
   application:
     name: exam1
+  datasource:
+    url: ${DBMS_CONNECTION}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+    signerKey: "ef03bad871c220f440e6975a1427d0aa6b3b1bfbcd9341016505cdda3dbee331"
+    valid-duration: 3600  # giây
+    refresh-duration: 36000 # giây, thông thường sẽ lâu hơn khoảng đơn vị 'ngày'

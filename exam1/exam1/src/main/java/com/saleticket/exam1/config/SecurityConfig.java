@@ -37,7 +37,9 @@ public class SecurityConfig {
                         "/auth/login",
                         "/users",
                         "/auth/logout",
-                        "/auth/refresh"
+                        "/auth/refresh",
+                        "/users/register",
+                        
         };
 
         @Bean

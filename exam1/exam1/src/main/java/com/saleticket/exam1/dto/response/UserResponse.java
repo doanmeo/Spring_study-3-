@@ -8,5 +8,5 @@ public record UserResponse(
     String id,
     String username,
     String email,
-    Set<Role> roles // Ta chỉ cần trả về danh sách tên quyền (VD: ["ROLE_USER"])
+    Set<String> roles // Ta chỉ cần trả về danh sách tên quyền (VD: ["ROLE_USER"])
 ) {}

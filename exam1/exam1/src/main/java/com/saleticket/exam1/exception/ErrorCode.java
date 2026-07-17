@@ -10,7 +10,13 @@ public enum ErrorCode {
     INVALID_CREDENTIALS(1003, "Sai tài khoản hoặc mật khẩu!", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1004, "Bạn chưa đăng nhập hoặc token không hợp lệ!", HttpStatus.UNAUTHORIZED),
     FORBIDDEN(1005, "Bạn không có quyền truy cập tài nguyên này!", HttpStatus.FORBIDDEN),
-    UNCATEGORIZED_EXCEPTION(9999, "Lỗi hệ thống không xác định!", HttpStatus.INTERNAL_SERVER_ERROR);
+    UNCATEGORIZED_EXCEPTION(9999, "Lỗi hệ thống không xác định!", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    EVENT_NOT_FOUND(1006, "Không tìm thấy sự kiện!", HttpStatus.NOT_FOUND),
+    INVALID_EVENT_DATE(1007, "Ngày tổ chức sự kiện phải ở trong tương lai!", HttpStatus.BAD_REQUEST),
+    SOLD_OUT(1008, "Rất tiếc! Số lượng vé còn lại không đủ đáp ứng yêu cầu của bạn.", HttpStatus.BAD_REQUEST),
+    TICKET_LIMIT_EXCEEDED(1009, "Bạn chỉ được mua tối đa 5 vé cho mỗi sự kiện để tránh đầu cơ!",
+            HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;

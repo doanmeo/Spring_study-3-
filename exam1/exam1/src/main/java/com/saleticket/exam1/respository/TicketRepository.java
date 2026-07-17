@@ -10,5 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, String> {
     // Hàm này kết hợp với Unique Constraint ở DB tạo thành 2 lớp bảo vệ
     boolean existsByEventAndUser(Event event, User user);
+
+    long countByEventAndUser(Event event, User user);
+
     
 }

@@ -39,6 +39,7 @@ public class SecurityConfig {
                         "/auth/logout",
                         "/auth/refresh",
                         "/users/register",
+                        "/events"
                         
         };
 

@@ -9,10 +9,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-// BẪY DATABASE: 1 User chỉ được sở hữu tối đa 1 vé cho 1 Event cụ thể
-@Table(name = "tickets", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_event_user", columnNames = {"event_id", "user_id"})
-})
+// // BẪY DATABASE: 1 User chỉ được sở hữu tối đa 1 vé cho 1 Event cụ thể
+// @Table(name = "tickets", uniqueConstraints = {
+//     @UniqueConstraint(name = "uk_event_user", columnNames = {"event_id", "user_id"})
+// })
 public class Ticket extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

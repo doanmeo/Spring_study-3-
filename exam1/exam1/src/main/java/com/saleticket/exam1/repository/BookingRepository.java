@@ -1,4 +1,4 @@
-package com.saleticket.exam1.respository;
+package com.saleticket.exam1.repository;
 
 import com.saleticket.exam1.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;

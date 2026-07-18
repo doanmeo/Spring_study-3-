@@ -9,10 +9,11 @@ import com.saleticket.exam1.enums.TicketStatus;
 import com.saleticket.exam1.entity.User;
 import com.saleticket.exam1.exception.AppException;
 import com.saleticket.exam1.exception.ErrorCode;
-import com.saleticket.exam1.respository.BookingRepository;
-import com.saleticket.exam1.respository.EventRepository;
-import com.saleticket.exam1.respository.TicketRepository;
-import com.saleticket.exam1.respository.UserRepository;
+import com.saleticket.exam1.repository.BookingRepository;
+import com.saleticket.exam1.repository.EventRepository;
+import com.saleticket.exam1.repository.TicketRepository;
+import com.saleticket.exam1.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 

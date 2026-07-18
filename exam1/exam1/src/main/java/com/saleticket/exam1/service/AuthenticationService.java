@@ -14,8 +14,8 @@ import com.saleticket.exam1.entity.InvalidatedToken;
 import com.saleticket.exam1.entity.User;
 import com.saleticket.exam1.exception.AppException;
 import com.saleticket.exam1.exception.ErrorCode;
-import com.saleticket.exam1.respository.InvalidatedTokenRepository;
-import com.saleticket.exam1.respository.UserRepository;
+import com.saleticket.exam1.repository.InvalidatedTokenRepository;
+import com.saleticket.exam1.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

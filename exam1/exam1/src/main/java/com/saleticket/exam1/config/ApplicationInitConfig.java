@@ -11,8 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.saleticket.exam1.entity.Role;
 import com.saleticket.exam1.entity.User;
-import com.saleticket.exam1.respository.RoleRepository;
-import com.saleticket.exam1.respository.UserRepository;
+import com.saleticket.exam1.repository.RoleRepository;
+import com.saleticket.exam1.repository.UserRepository;
 
 import lombok.extern.slf4j.Slf4j;
 

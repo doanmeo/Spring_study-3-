@@ -9,8 +9,9 @@ import com.saleticket.exam1.entity.User;
 import com.saleticket.exam1.exception.AppException;
 import com.saleticket.exam1.exception.ErrorCode;
 import com.saleticket.exam1.mapper.UserMapper;
-import com.saleticket.exam1.respository.RoleRepository;
-import com.saleticket.exam1.respository.UserRepository;
+import com.saleticket.exam1.repository.RoleRepository;
+import com.saleticket.exam1.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
@@ -33,6 +34,8 @@ public class UserService {
     RoleRepository roleRepository;
 
     UserMapper userMapper;
+    // PasswordEncoder encoder = new BCryptPasswordEncoder(10);// mã hóa mật khẩu với độ dài 10 ký tự
+    PasswordEncoder passwordEncoder;
 
     public UserResponse getMyInfo() {
         // 1. Lấy thông tin xác thực từ Security Context
@@ -51,10 +54,10 @@ public class UserService {
     }
 
     public List<UserResponse> getAllUsers() {
-    return userRepository.findAll().stream()
-            .map(userMapper::toUserResponse)
-            .toList();
-}
+        return userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -63,8 +66,7 @@ public class UserService {
         // } ko can nua vi da co Unique trong entity
         User user = userMapper.toUser(request);
 
-        PasswordEncoder encoder = new BCryptPasswordEncoder(10);// mã hóa mật khẩu với độ dài 10 ký tự
-        user.setPassword(encoder.encode(request.password()));
+        user.setPassword(passwordEncoder.encode(request.password()));
 
         // user.setUsername(request.getUsername());
         // user.setPassword(request.getPassword());
@@ -100,8 +102,7 @@ public class UserService {
         }
         userMapper.updateUser(request, user);
 
-        PasswordEncoder encoder = new BCryptPasswordEncoder(10);// mã hóa mật khẩu với độ dài 10 ký tự
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         var roles = new HashSet<Role>();
         if (request.getRoles() != null && !request.getRoles().isEmpty()) {

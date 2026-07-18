@@ -5,7 +5,8 @@ import com.saleticket.exam1.dto.response.EventResponse;
 import com.saleticket.exam1.enums.EventStatus;
 import com.saleticket.exam1.entity.Event;
 import com.saleticket.exam1.mapper.EventMapper;
-import com.saleticket.exam1.respository.EventRepository;
+import com.saleticket.exam1.repository.EventRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -182,7 +182,7 @@ public class AuthenticationService {
     // logout
     public ApiResponse<Void> logout(LogoutRequest request) {
         try {
-            var signedToken = verifyToken(request.getToken(), true); // xác minh token
+            var signedToken = verifyToken(request.getToken(), false); // xác minh token
 
             String jwt_id = signedToken.getJWTClaimsSet().getJWTID();// lấy jwt_id từ token
             Date expirationTime = signedToken.getJWTClaimsSet().getExpirationTime();// lấy thời gian hết hạn từ token
@@ -193,14 +193,10 @@ public class AuthenticationService {
             invalidatedTokenRepository.save(invalidatedToken);
             // lưu token đã bị thu hồi vào cơ sở dữ liệu
             log.info("Token invalidated successfully");
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (JOSEException e) {
-            e.printStackTrace();
-        } catch (AppException e) {
-            log.info("Token is invalid or expired, no need to invalidate again");
-            // khi token không hợp lệ hoặc đã hết hạn, không cần phải thu hồi lại, chỉ cần
-            // ghi log và trả về phản hồi thành công
+        } catch (ParseException | JOSEException | AppException e) {
+            // Nếu token không hợp lệ hoặc đã hết hạn, không cần làm gì thêm.
+            // Ném lại lỗi để GlobalExceptionHandler xử lý hoặc trả về lỗi rõ ràng.
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         return ApiResponse.<Void>builder().build();

@@ -3,11 +3,12 @@ package com.saleticket.exam1.exception;
 import com.saleticket.exam1.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice//
+@RestControllerAdvice //
 public class GlobalExceptionHandler {
 
     // Bắt lỗi nghiệp vụ tự định nghĩa
@@ -29,8 +30,7 @@ public class GlobalExceptionHandler {
                 ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
-                        .build()
-        );
+                        .build());
     }
 
     // Bắt lỗi Validation (Khi @Valid DTO bị xịt)
@@ -41,8 +41,18 @@ public class GlobalExceptionHandler {
                 ApiResponse.<Void>builder()
                         .code(400)
                         .message(errorMessage)
-                        .build()
-        );
+                        .build());
+    }
+
+    // jwtException
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJwtException(JwtException ex) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity.status(errorCode.getStatusCode()).body(
+                ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 
     // Lưới đánh cá cuối cùng: Bắt các lỗi chưa biết
@@ -52,7 +62,6 @@ public class GlobalExceptionHandler {
                 ApiResponse.<Void>builder()
                         .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
                         .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage() + " - " + ex.getMessage())
-                        .build()
-        );
+                        .build());
     }
 }

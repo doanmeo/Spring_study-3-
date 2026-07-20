@@ -1,9 +1,9 @@
 package com.saleticket.exam1.config;
 
 import java.nio.charset.StandardCharsets;
-
 import javax.crypto.spec.SecretKeySpec;
 
+import com.saleticket.exam1.repository.InvalidatedTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +33,8 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
         @Value("${jwt.signerKey}")
         String secretKey;
+        @Autowired
+        private InvalidatedTokenRepository invalidatedTokenRepository;
         private static final String[] PUBLIC_ENDPOINTS = {
                         "/auth/login",
                         "/users",
@@ -40,7 +42,7 @@ public class SecurityConfig {
                         "/auth/refresh",
                         "/users/register",
                         "/events"
-                        
+
         };
 
         @Bean
@@ -56,6 +58,10 @@ public class SecurityConfig {
                                                 // .requestMatchers(HttpMethod.GET,
                                                 // "/users").hasRole("Role.ADMIN.name()") // Cách sử dụng hasRole khi đã
                                                 // có tiền tố ROLE_ trong authority ma ko quan tâm đến tiền tố
+                                                .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers("/v3/api-docs/**").permitAll()
+                                                .requestMatchers("/swagger-ui/**").permitAll()
+                                                .requestMatchers("/swagger-ui.html").permitAll()
                                                 .anyRequest().authenticated() // Yêu cầu xác thực cho tất cả các yêu cầu
                                                                               // khác
                                 // .anyRequest().permitAll()
@@ -84,6 +90,8 @@ public class SecurityConfig {
         public CorsFilter corsFilter() {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.addAllowedOriginPattern("*");
+
+                configuration.setAllowCredentials(true); // Allow credentials (e.g., cookies, authorization headers)
 
                 configuration.addAllowedMethod("*");
                 configuration.addAllowedHeader("*");
@@ -133,11 +141,13 @@ public class SecurityConfig {
         }
 
         @Bean
-        JwtDecoder jwtDecoder() {
+        public JwtDecoder jwtDecoder() {
                 SecretKeySpec secretKey1 = new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
-                return NimbusJwtDecoder.withSecretKey(secretKey1)
+                var nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKey1)
                                 .macAlgorithm(MacAlgorithm.HS512)
                                 .build();
+
+                return new CustomJwtDecoder(nimbusJwtDecoder, invalidatedTokenRepository);
         }
 
 }

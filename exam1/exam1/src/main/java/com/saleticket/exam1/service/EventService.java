@@ -8,6 +8,9 @@ import com.saleticket.exam1.mapper.EventMapper;
 import com.saleticket.exam1.repository.EventRepository;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,10 +32,9 @@ public class EventService {
     }
 
     // Lấy danh sách sự kiện (Có thể mở rộng thêm Phân trang - Pageable sau)
-    public List<EventResponse> getAllEvents() {
-        return eventRepository.findAll().stream()
-                .map(eventMapper::toEventResponse)
-                .toList();
+   public Page<EventResponse> getAllEvents(Pageable pageable) {
+        return eventRepository.findAll(pageable)
+                .map(eventMapper::toEventResponse);
     }
 
 }

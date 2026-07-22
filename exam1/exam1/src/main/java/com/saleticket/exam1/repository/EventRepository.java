@@ -20,4 +20,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Transactional
     @Query("UPDATE Event e SET e.availableTickets = e.availableTickets - :quantity WHERE e.id = :eventId AND e.availableTickets >= :quantity")
     int decrementTickets(@Param("eventId") Long eventId, @Param("quantity") int quantity);
+
+     // 1. Chuyển sang SOLD_OUT nếu hết vé
+    @Modifying
+    @Transactional
+    @Query("UPDATE Event e SET e.status = 'SOLD_OUT' WHERE e.status = 'ONGOING' AND e.availableTickets <= 0")
+    int updateStatusToSoldOut();
+    
+    // 2. Hàm hoàn trả vé (Restore) khi Hóa đơn bị hủy
+    @Modifying
+    @Transactional
+    @Query("UPDATE Event e SET e.availableTickets = e.availableTickets + :quantity WHERE e.id = :eventId")
+    void restoreTickets(@Param("eventId") Long eventId, @Param("quantity") int quantity);
 }

@@ -68,7 +68,7 @@ public class BookingService {
         Booking booking = Booking.builder()
                 .user(user)
                 .totalAmount(totalAmount)
-                .status(BookingStatus.COMPLETED.name()) // Sử dụng enum
+                .status(BookingStatus.PENDING.name()) // Sử dụng enum
                 .build();
         booking = bookingRepository.save(booking);
 
@@ -80,12 +80,42 @@ public class BookingService {
                     .user(user)
                     .booking(booking)
                     .qrCodeData(UUID.randomUUID().toString()) // Sinh mã QR ngẫu nhiên cho mỗi vé
-                    .status(TicketStatus.PAID.name()) // Sử dụng enum
+                    .status(TicketStatus.RESERVED.name()) // Sử dụng enum
                     .build();
             tickets.add(ticket);
         }
         ticketRepository.saveAll(tickets);
 
-        return "Chúc mừng bạn đã giành được " + request.quantity() + " vé thành công!";
+        // Trả về ID của Booking để Frontend chuyển sang trang Thanh toán
+        return "Đặt vé thành công! Mã đơn hàng: " + booking.getId() + ". Vui lòng thanh toán trong 15 phút!";
     }
+     @Transactional
+    public String payBooking(String bookingId) {
+        // 1. Xác thực User hiện tại
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        // 2. Tìm Hóa đơn
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+        // 3. Kiểm tra bảo mật: Chỉ chính chủ hóa đơn mới được thanh toán
+        if (!booking.getUser().getUsername().equals(username)) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+
+        // 4. Kiểm tra trạng thái: Phải là PENDING mới được thanh toán
+        if (!booking.getStatus().equals("PENDING")) {
+            throw new AppException(ErrorCode.PAYMENT_STATUS_INVALID);
+        }
+
+        // 5. Cập nhật trạng thái
+        booking.setStatus(BookingStatus.COMPLETED.name());
+        bookingRepository.save(booking);
+        
+        // Cập nhật tất cả vé bên trong thành PAID
+        booking.getTickets().forEach(ticket -> ticket.setStatus(TicketStatus.PAID.name()));
+        ticketRepository.saveAll(booking.getTickets());
+
+        return "Thanh toán thành công hóa đơn " + bookingId + "!";
+    }
+
 }

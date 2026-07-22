@@ -8,6 +8,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,13 +27,23 @@ public class EventController {
 
     // Xem danh sách sự kiện (Ai cũng xem được, public)
     @GetMapping
-    public ApiResponse<List<EventResponse>> getAllEvents() {
-        return ApiResponse.<List<EventResponse>>builder()
+    public ApiResponse<Page<EventResponse>> getAllEvents(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+        // Chú ý: Frontend thường đếm page từ 1, nhưng Spring Boot đếm page từ 0
+        int pageNumber = page > 0 ? page - 1 : 0;
+        
+        Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(pageNumber, size, sort);
+
+        return ApiResponse.<Page<EventResponse>>builder()
                 .code(200)
-                .result(eventService.getAllEvents())
+                .result(eventService.getAllEvents(pageable))
                 .build();
     }
-
     // Thêm sự kiện mới (Chỉ ADMIN)
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

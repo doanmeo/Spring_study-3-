@@ -16,7 +16,12 @@ public enum ErrorCode {
     INVALID_EVENT_DATE(1007, "Ngày tổ chức sự kiện phải ở trong tương lai!", HttpStatus.BAD_REQUEST),
     SOLD_OUT(1008, "Rất tiếc! Số lượng vé còn lại không đủ đáp ứng yêu cầu của bạn.", HttpStatus.BAD_REQUEST),
     TICKET_LIMIT_EXCEEDED(1009, "Bạn chỉ được mua tối đa 5 vé cho mỗi sự kiện để tránh đầu cơ!",
-            HttpStatus.BAD_REQUEST);
+            HttpStatus.BAD_REQUEST),
+    BOOKING_NOT_FOUND(1010, "Không tìm thấy đơn hàng!", HttpStatus.NOT_FOUND),
+    PAYMENT_STATUS_INVALID(1011,"Hóa đơn này không ở trạng thái chờ thanh toán!", HttpStatus.BAD_REQUEST)
+    
+    ;
+
 
     private final int code;
     private final String message;

@@ -26,4 +26,13 @@ public class BookingController {
                 .result(bookingService.bookTicket(request))
                 .build();
     }
+    // API Thanh toán giả lập
+    @PostMapping("/{id}/pay")
+    public ApiResponse<String> payBooking(@PathVariable("id") String bookingId) {
+        return ApiResponse.<String>builder()
+                .code(200)
+                .message("Thành công")
+                .result(bookingService.payBooking(bookingId))
+                .build();
+    }
 }

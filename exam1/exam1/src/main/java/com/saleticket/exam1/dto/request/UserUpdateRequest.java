@@ -27,6 +27,4 @@ public class UserUpdateRequest {
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
     String email;
-    
-    Set<String> roles;
 }

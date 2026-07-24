@@ -17,6 +17,7 @@ public enum ErrorCode {
     SOLD_OUT(1008, "Rất tiếc! Số lượng vé còn lại không đủ đáp ứng yêu cầu của bạn.", HttpStatus.BAD_REQUEST),
     TICKET_LIMIT_EXCEEDED(1009, "Bạn chỉ được mua tối đa 5 vé cho mỗi sự kiện để tránh đầu cơ!",
             HttpStatus.BAD_REQUEST),
+    EVENT_INVALID_TICKET_COUNT(1012, "Số vé vé không thể giảm thấp hơn số vé đã lỡ bán ra", HttpStatus.BAD_REQUEST),
     BOOKING_NOT_FOUND(1010, "Không tìm thấy đơn hàng!", HttpStatus.NOT_FOUND),
     PAYMENT_STATUS_INVALID(1011,"Hóa đơn này không ở trạng thái chờ thanh toán!", HttpStatus.BAD_REQUEST)
     

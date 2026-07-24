@@ -1,6 +1,7 @@
 package com.saleticket.exam1.repository;
 
 import com.saleticket.exam1.entity.Booking;
+import com.saleticket.exam1.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,4 +16,5 @@ public interface BookingRepository extends JpaRepository<Booking, String> {
     // Tìm các Booking đang PENDING và đã quá hạn (Ví dụ: tạo trước thời điểm 15 phút trước)
     @Query("SELECT b FROM Booking b WHERE b.status = 'PENDING' AND b.createdAt <= :expireTime")
     List<Booking> findExpiredBookings(@Param("expireTime") LocalDateTime expireTime);
+    List<Booking> findByUserOrderByCreatedAtDesc(User user);
 }

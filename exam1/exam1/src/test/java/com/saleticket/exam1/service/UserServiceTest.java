@@ -1,6 +1,7 @@
 package com.saleticket.exam1.service;
 
 import com.saleticket.exam1.dto.request.UserCreationRequest;
+import com.saleticket.exam1.dto.response.AuthenticationResponse;
 import com.saleticket.exam1.dto.response.UserResponse;
 import com.saleticket.exam1.entity.Role;
 import com.saleticket.exam1.entity.User;
@@ -17,8 +18,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,11 +58,27 @@ class UserServiceTest {
 
     private UserCreationRequest request;
     private UserResponse expectedResponse;
+    private User currentUser;
+    private AuthenticationResponse authResponse;
 
     @BeforeEach
     void setUp() {
         request = new UserCreationRequest("doanmeo", "password123", "doan@gmail.com");
         expectedResponse = new UserResponse("id1", "doanmeo", "doan@gmail.com", Set.of("USER"));
+        authResponse = new AuthenticationResponse("123", true);
+
+        currentUser = new User();
+        currentUser.setId("user-1");
+        currentUser.setUsername("doanmeo");
+        currentUser.setEmail("doan@gmail.com");
+        currentUser.setPassword("encoded_password");
+        currentUser.setRoles(new HashSet<>(Set.of(new Role(1L, "USER", "User role"))));
+
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        Authentication authentication = org.mockito.Mockito.mock(Authentication.class);
+        org.mockito.BDDMockito.given(authentication.getName()).willReturn("doanmeo");
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
     }
 
     @Test
@@ -102,5 +123,26 @@ class UserServiceTest {
         AppException exception = assertThrows(AppException.class, () -> userService.createUser(request));
         // Kiểm tra đúng mã lỗi
         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_EXISTED);
+    }
+
+    @Test
+    @DisplayName("upgradeToOrganizer - khi user tồn tại và role ORGANIZER đã được khởi tạo thì bổ sung role mới")
+    void upgradeToOrganizer_WhenUserExists_ShouldAddOrganizerRole() {
+        User savedUser = new User();
+        savedUser.setId("user-1");
+        savedUser.setUsername("doanmeo");
+        savedUser.setEmail("doan@gmail.com");
+        savedUser.setRoles(new HashSet<>(Set.of(new Role(1L, "USER", "User role"), new Role(2L, "ORGANIZER", "Organizer role"))));
+
+        given(userRepository.findByUsername("doanmeo")).willReturn(Optional.of(currentUser));
+        given(roleRepository.findByName("ORGANIZER")).willReturn(Optional.of(new Role(2L, "ORGANIZER", "Organizer role")));
+        given(userRepository.save(any(User.class))).willReturn(savedUser);
+        given(userMapper.toUserResponse(any(User.class))).willReturn(new UserResponse("user-1", "doanmeo", "doan@gmail.com", Set.of("USER", "ORGANIZER")));
+
+        authResponse = userService.upgradeToOrganizer();
+
+        assertThat(authResponse.token()).isNotNull();
+        assertThat(authResponse.authenticated()).isTrue();
+        verify(userRepository).save(any(User.class));
     }
 }

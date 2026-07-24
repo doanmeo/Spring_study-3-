@@ -2,6 +2,7 @@ package com.saleticket.exam1.service;
 
 import com.saleticket.exam1.dto.request.UserCreationRequest;
 import com.saleticket.exam1.dto.request.UserUpdateRequest;
+import com.saleticket.exam1.dto.response.AuthenticationResponse;
 import com.saleticket.exam1.dto.response.UserResponse;
 import com.saleticket.exam1.entity.Role;
 
@@ -34,8 +35,10 @@ public class UserService {
     RoleRepository roleRepository;
 
     UserMapper userMapper;
-    // PasswordEncoder encoder = new BCryptPasswordEncoder(10);// mã hóa mật khẩu với độ dài 10 ký tự
+    // PasswordEncoder encoder = new BCryptPasswordEncoder(10);// mã hóa mật khẩu
+    // với độ dài 10 ký tự
     PasswordEncoder passwordEncoder;
+    AuthenticationService authenticationService;
 
     public UserResponse getMyInfo() {
         // 1. Lấy thông tin xác thực từ Security Context
@@ -88,9 +91,13 @@ public class UserService {
         return userMapper.toUserResponse(user); // Chuyển đổi thực thể User thành UserResponse và trả về kết quả
     }
 
-    public UserResponse updateUser(UserUpdateRequest request, String userid) {
-        User user = userRepository.findById(userid)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserResponse updateUser(UserUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String username = context.getAuthentication().getName();
+
+        // 2. Chọc xuống DB lấy thông tin User
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         // user.setPassword(request.getPassword());
         // user.setEmail(request.getEmail());
         // user.setFirstName(request.getFirstName());
@@ -104,18 +111,35 @@ public class UserService {
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        var roles = new HashSet<Role>();
-        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
-            Set<Role> foundRoles = roleRepository.findByNameIn(request.getRoles());
-            if (foundRoles.size() != request.getRoles().size()) {
-                throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-            }
-            roles.addAll(foundRoles);
-        }
-
-        user.setRoles(roles);
         return userMapper.toUserResponse(userRepository.save(user));
     }
+
+    public AuthenticationResponse upgradeToOrganizer() {
+    var context = SecurityContextHolder.getContext();
+    String username = context.getAuthentication().getName();
+
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+    Set<Role> roles = user.getRoles() == null
+            ? new HashSet<>()
+            : new HashSet<>(user.getRoles());
+
+    Role organizerRole = roleRepository.findByName(com.saleticket.exam1.enums.Role.ORGANIZER.name())
+            .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION, "Role ORGANIZER chưa được khởi tạo"));
+
+    roles.add(organizerRole);
+    user.setRoles(roles);
+
+    user = userRepository.save(user);
+    
+    String newToken = authenticationService.generateToken(user);
+
+    return AuthenticationResponse.builder()
+            .token(newToken)
+            .authenticated(true)
+            .build();
+}
 
     public void deleteUser(String userid) {
         userRepository.deleteById(userid);

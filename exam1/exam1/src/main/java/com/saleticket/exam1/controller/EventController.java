@@ -1,6 +1,7 @@
 package com.saleticket.exam1.controller;
 
 import com.saleticket.exam1.dto.request.EventCreationRequest;
+import com.saleticket.exam1.dto.request.EventUpdateRequest;
 import com.saleticket.exam1.dto.response.ApiResponse;
 import com.saleticket.exam1.dto.response.EventResponse;
 import com.saleticket.exam1.service.EventService;
@@ -44,14 +45,39 @@ public class EventController {
                 .result(eventService.getAllEvents(pageable))
                 .build();
     }
-    // Thêm sự kiện mới (Chỉ ADMIN)
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
     public ApiResponse<EventResponse> createEvent(@Valid @RequestBody EventCreationRequest request) {
         return ApiResponse.<EventResponse>builder()
                 .code(200)
                 .message("Tạo sự kiện thành công!")
                 .result(eventService.createEvent(request))
+                .build();
+    }
+    // Xem chi tiết (Public)
+    @GetMapping("/{id}")
+    public ApiResponse<EventResponse> getEventDetail(@PathVariable Long id) {
+        return ApiResponse.<EventResponse>builder()
+                .result(eventService.getEventById(id))
+                .build();
+    }
+
+    // Cập nhật sự kiện 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    public ApiResponse<EventResponse> updateEvent(@PathVariable Long id, @Valid @RequestBody EventUpdateRequest request) {
+        return ApiResponse.<EventResponse>builder()
+                .result(eventService.updateEvent(id, request))
+                .build();
+    }
+
+    // Hủy sự kiện 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER')")
+    public ApiResponse<String> cancelEvent(@PathVariable Long id) {
+        eventService.cancelEvent(id);
+        return ApiResponse.<String>builder()
+                .message("Đã hủy sự kiện!")
                 .build();
     }
 }

@@ -2,10 +2,13 @@ package com.saleticket.exam1.controller;
 
 import com.saleticket.exam1.dto.request.BookingRequest;
 import com.saleticket.exam1.dto.response.ApiResponse;
+import com.saleticket.exam1.dto.response.BookingResponse;
 import com.saleticket.exam1.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +36,22 @@ public class BookingController {
                 .code(200)
                 .message("Thành công")
                 .result(bookingService.payBooking(bookingId))
+                .build();
+    }
+    // Xem lịch sử bản thân
+    @GetMapping("/me")
+    public ApiResponse<List<BookingResponse>> getMyBookings() {
+        return ApiResponse.<List<BookingResponse>>builder()
+                .result(bookingService.getMyBookings())
+                .build();
+    }
+
+    // User tự hủy đơn
+    @PostMapping("/{id}/cancel")
+    public ApiResponse<String> cancelMyBooking(@PathVariable("id") String bookingId) {
+        return ApiResponse.<String>builder()
+                .message("Thành công")
+                .result(bookingService.cancelMyBooking(bookingId))
                 .build();
     }
 }

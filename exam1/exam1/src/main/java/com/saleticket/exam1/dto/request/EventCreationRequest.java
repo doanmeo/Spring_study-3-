@@ -8,16 +8,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record EventCreationRequest(
-        @NotBlank(message = "Tên sự kiện không được để trống") String name,
-
+        @NotBlank(message = "Tên sự kiện không được để trống")
+        String name,
         String description,
-
-        @NotNull(message = "Ngày sự kiện không được để trống") @Future(message = "INVALID_EVENT_DATE") // Ngày sự kiện
-                                                                                                       // bắt buộc ở
-                                                                                                       // tương lai
+        @NotNull(message = "Ngày sự kiện không được để trống")
+        @Future(message = "INVALID_EVENT_DATE") // Ngày sự kiện                                                                                            // bắt buộc ở                                                                                               // tương lai
         LocalDateTime eventDate,
-
         @Min(value = 1, message = "Tổng số vé phải lớn hơn 0") Integer totalTickets,
-
         @Min(value = 0, message = "Giá vé không hợp lệ") BigDecimal price) {
 }

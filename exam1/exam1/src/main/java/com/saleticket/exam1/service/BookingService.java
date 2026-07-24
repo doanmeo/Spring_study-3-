@@ -1,6 +1,7 @@
 package com.saleticket.exam1.service;
 
 import com.saleticket.exam1.dto.request.BookingRequest;
+import com.saleticket.exam1.dto.response.BookingResponse;
 import com.saleticket.exam1.enums.BookingStatus;
 import com.saleticket.exam1.entity.Booking;
 import com.saleticket.exam1.entity.Event;
@@ -116,6 +117,57 @@ public class BookingService {
         ticketRepository.saveAll(booking.getTickets());
 
         return "Thanh toán thành công hóa đơn " + bookingId + "!";
+    }
+
+    // Xem lịch sử đặt vé của bản thân
+    public List<BookingResponse> getMyBookings() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        return bookingRepository.findByUserOrderByCreatedAtDesc(user).stream()
+                .map(booking -> new BookingResponse(
+                        booking.getId(),
+                        booking.getTickets().isEmpty() ? "Unknown Event" : booking.getTickets().get(0).getEvent().getName(),
+                        booking.getTickets().size(),
+                        booking.getTotalAmount(),
+                        booking.getStatus(),
+                        booking.getCreatedAt()
+                )).toList();
+    }
+
+    // Tự tay hủy đơn (Chỉ hủy được khi PENDING)
+    @Transactional
+    public String cancelMyBooking(String bookingId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND));
+
+        // Chỉ chủ đơn mới được hủy
+        if (!booking.getUser().getUsername().equals(username)) {
+            throw new AppException(ErrorCode.FORBIDDEN);
+        }
+
+        if (!booking.getStatus().equals("PENDING")) {
+            throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ thanh toán!");
+        }
+
+        // Đổi trạng thái Booking
+        booking.setStatus("CANCELLED");
+        bookingRepository.save(booking);
+
+        // Hủy các vé bên trong
+        booking.getTickets().forEach(ticket -> ticket.setStatus("CANCELLED"));
+        
+        // Nhả vé (Restore tickets) lại cho Event
+        int quantity = booking.getTickets().size();
+        if (quantity > 0) {
+            Long eventId = booking.getTickets().get(0).getEvent().getId();
+            eventRepository.restoreTickets(eventId, quantity);
+        }
+
+        return "Hủy đơn hàng thành công! Đã hoàn trả vé cho hệ thống.";
     }
 
 }

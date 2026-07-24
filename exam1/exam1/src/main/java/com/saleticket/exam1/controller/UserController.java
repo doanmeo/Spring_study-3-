@@ -3,6 +3,7 @@ package com.saleticket.exam1.controller;
 import com.saleticket.exam1.dto.request.UserCreationRequest;
 import com.saleticket.exam1.dto.request.UserUpdateRequest;
 import com.saleticket.exam1.dto.response.ApiResponse;
+import com.saleticket.exam1.dto.response.AuthenticationResponse;
 import com.saleticket.exam1.dto.response.UserResponse;
 import com.saleticket.exam1.entity.User;
 import com.saleticket.exam1.service.UserService;
@@ -55,24 +56,19 @@ public class UserController {
     // API 2: Đăng ký tài khoản
     @PostMapping("/register")
     public ApiResponse<UserResponse> register(@RequestBody @Valid UserCreationRequest request) {
-        try {
-            return ApiResponse.<UserResponse>builder()
-                    .code(200)
-                    .message("Đăng ký thành công!")
-                    .result(userService.createUser(request))
-                    .build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return ApiResponse.<UserResponse>builder()
+                .code(200)
+                .message("Đăng ký thành công!")
+                .result(userService.createUser(request))
+                .build();
     }
 
-    @PutMapping("/{userid}")
-    public ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request,
-            @PathVariable("userid") String userid) {
+    @PutMapping("/me")
+    public ApiResponse<UserResponse> updateMyProfile(@RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .code(200)
                 .message("Cập nhật thông tin thành công!")
-                .result(userService.updateUser(request, userid))
+                .result(userService.updateUser(request))
                 .build();
     }
 
@@ -87,6 +83,15 @@ public class UserController {
                 .code(200)
                 .message("Xác thực quyền Admin thành công!")
                 .result("Đây là dữ liệu tuyệt mật chỉ Admin mới thấy.")
+                .build();
+    }
+
+    @PostMapping("/upgrade-organizer")
+    public ApiResponse<AuthenticationResponse> upgradeToOrganizer() {
+        return ApiResponse.<AuthenticationResponse>builder()
+                .code(200)
+                .message("Nâng quyền ORGANIZER thành công!")
+                .result(userService.upgradeToOrganizer())
                 .build();
     }
 }

@@ -40,4 +40,9 @@ public class Event extends BaseEntity {
     // Trạng thái sự kiện: UPCOMING, ONGOING, COMPLETED, CANCELLED
     @Column(nullable = false, length = 20)
     private String status; 
+
+    // Liên kết sự kiện với Chủ tổ chức (ORGANIZER)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
 }
